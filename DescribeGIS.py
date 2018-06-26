@@ -9,6 +9,7 @@ def listgeodatabase(path):
 
     featureclass = arcpy.ListFeatureClasses()
     raster = arcpy.ListRasters()
+    tables = arcpy.ListTables()
 
     csvfile.writerow([""])
     csvfile.writerow(["The Feature Classes in " + path + " are listed below"])
@@ -23,12 +24,23 @@ def listgeodatabase(path):
     csvfile.writerow([""])
     csvfile.writerow(["The Rasters in " + path + " are listed below"])
     for ras in raster:
-        desc = arcpy.Describe(ras)
+
         try:
+            desc = arcpy.Describe(ras)
             csvfile.writerow([desc.name,desc.format,arcpy.env.workspace + "\\" + ras,desc.compressionType,desc.spatialreference.name])
         except:
             print(ras + " did not seem to be able to be opened")
             continue
+
+    csvfile.writerow([""])
+    csvfile.writerow(["The tables in " + path + " are listed below"])
+    for table in tables:
+        desc = arcpy.Describe(table)
+        try:
+            csvfile.writerow([desc.name,"Table"])
+        except:
+            print (table + " Did not seem to be able to be opened")
+
 
     csvfile.writerow([""])
     csvfile.writerow([""])
@@ -79,8 +91,13 @@ def listfolder(path):
 
 
     for maps in mxd:
-        csvfile.printrow("A list of the layers in " + maps)
-        for lyr in arcpy.mapping.ListLayers(maps):
+        mxd = arcpy.mapping.MapDocument(arcpy.env.workspace + "\\" + maps)
+        csvfile.writerow(["The Projections for " + maps + " dataframes are listed below"])
+        for df in arcpy.mapping.ListDataFrames(mxd):
+            csvfile.writerow([df.name, df.spatialReference.name])
+
+        csvfile.writerow(["A list of the layers in " + maps])
+        for lyr in arcpy.mapping.ListLayers(mxd):
             if lyr.supports("DATASOURCE"):
                 csvfile.writerow([lyr.datasetName,lyr.dataSource])
         csvfile.writerow([""])
@@ -101,16 +118,13 @@ def listfolder(path):
 
 
 
-import csv
+
 file = open("C:\\Users\\hstgeorge\\Desktop\\test.csv",'w')
 csvfile = csv.writer(file,csv.excel,lineterminator = '\n')
 
-import arcpy
+
 startpath = r'D:\Data for testing'
 arcpy.env.workspace = startpath
-for cad in arcpy.ListDatasets("*.dwg"):
-    arcpy.Describe(cad)
-    print (cad)
 
 
 file.flush()
