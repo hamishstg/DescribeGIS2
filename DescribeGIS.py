@@ -119,11 +119,11 @@ def listfolder(path):
 
 
 
-file = open("C:\\Users\\hstgeorge\\Desktop\\test.csv",'w')
+file = open("C:\\Users\\hstgeorge\\Desktop\\test1.csv",'w')
 csvfile = csv.writer(file,csv.excel,lineterminator = '\n')
 
 
-startpath = r'D:\Data for testing'
+startpath = r'C:\EsriTraining\EsriTraining\ARC2\Analysis'
 arcpy.env.workspace = startpath
 
 
