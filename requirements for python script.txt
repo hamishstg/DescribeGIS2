@@ -1,0 +1,44 @@
+Hi Hamish,
+
+We’ve had a project pushed to us to help us and clients in the migration to GDA2020. We’re not flushed with python skills on support but I thought that this could be a good project for you where you could write some real python code and develop your knowledge.
+
+Here's the task that’s been put to us. It’s a bit loose but I can get you in touch with the appropriate people to get more detail.
+
+Python script that the Script can be pointed to either:
+•	Enterprise GeoDatabase; and/or
+•	A folder, common file system location for GIS data on the network
+
+Scripts to report on the following types of Enterprise Geodatabase Types:
+•	FeatureClasses
+•	Tables
+•	Relationship Classes
+•	Topology Rules
+
+Script to report on the following file based spatial datasets:
+•	ShapeFile
+•	FileGeodatabase + content
+•	Image Formats
+•	MapInfo Formats
+•	CAD formats
+
+Script will report on each dataset found
+•	Name
+•	Type
+•	Path
+•	Geometry Type
+•	Projection
+•	Number of Features
+
+Script will report on MXDs/aproj files 
+•	Datasets are referenced
+•	Dataframe Projection
+
+Result listed out into excel/csv file
+
+The above should be a good starting place but could be built upon.
+
+There’s an estimation of 2 days work to produce these scripts. I think it sounds reasonable but I also acknowledge that you don’t have much experience in this space. I’m also acknowledging that we’re busy on support!
+
+My thoughts are that you have a look at this project at the end of your day when support slows down and the phones stop ringing. This week it’s maybe 1hr per day and next week when we’ve got more on 2hrs per day. This gets you up to 13hrs if you were to kick it off today.
+
+So what do you think?  What do you need?

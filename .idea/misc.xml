@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+<<<<<<< HEAD
   <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.6" project-jdk-type="Python SDK" />
+=======
+  <component name="ProjectRootManager" version="2" project-jdk-name="Python 2.7 (describegis-master)" project-jdk-type="Python SDK" />
+>>>>>>> b51cf7e5ceaf01a11e0962d0d890c081f48639b8
 </project>

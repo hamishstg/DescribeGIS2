@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/DescribeGIS.iml" filepath="$PROJECT_DIR$/.idea/DescribeGIS.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/describegis.iml" filepath="$PROJECT_DIR$/.idea/describegis.iml" />
     </modules>
   </component>
 </project>
