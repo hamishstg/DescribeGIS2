@@ -2,8 +2,7 @@ import arcpy
 import csv
 import os
 
-
-def listfolder(path):
+def listfolder(path,csvfile):
     arcpy.env.workspace = path
     csvfile.writerow(["the Current workpath is " + path])
     csvfile.writerow([""])
@@ -17,7 +16,7 @@ def listfolder(path):
     
     csvfile.writerow(["The shapefiles in this folder are Listed Below:"])
     for fc in featureclass:
-        desc = arcpy.Describe(fc)
+		desc = arcpy.Describe(fc)
         try:
             csvfile.writerow([desc.name,"Shapefile",arcpy.env.workspace + "\\" + fc,desc.featureType + " " + desc.shapeType,desc.spatialreference.name,arcpy.GetCount_management(fc)])
         except:
@@ -37,7 +36,8 @@ def listfolder(path):
 
 
     csvfile.writerow([""])
-    csvfile.writerow(["The rasters within this folder are listed below:"])
+	csvfile.writerow(["The rasters within this folder are listed below:"])
+    
     for ras in raster:
         try:
             desc = arcpy.Describe(ras)
@@ -63,15 +63,60 @@ def listfolder(path):
     csvfile.writerow([""])
     for work in workspace:
         print(work)
-        if work.endswith(".gdb"):
-            #print(work)
-            listgeodatabase(work)
-            #call list file geodatabase function
-        elif os.path.isdir(work):
-            #print(work)
-            listfolder(work)
+            if work.endswith(".gdb"):
+                #print(work)
+				listgeodatabase(work,csvfile)
+				#call list file geodatabase function
+			elif os.path.isdir(work):
+				#print(work)
+				listfolder(work,csvfile)
 
     file.flush()
+    
+
+def listgeodatabase(path,csvfile):
+    arcpy.env.workspace = path
+    csvfile.writerow(["The current file Geodatabase is " + path])
+    
+    featureclass = arcpy.ListFeatureClasses()
+    raster = arcpy.ListRasters()
+    tables = arcpy.ListTables()
+
+    csvfile.writerow([""])
+    csvfile.writerow(["The Feature Classes in " + path + " are listed below"])
+    for fc in featureclass:
+        desc = arcpy.Describe(fc)
+        try:
+            csvfile.writerow([desc.name,"Feature Class",arcpy.env.workspace + "\\" + fc,desc.featureType + " " + desc.shapeType,desc.spatialreference.name,arcpy.GetCount_management(fc)])
+        except:
+            print(fc + " did not seem to be able to be opened")
+            continue
+
+    csvfile.writerow([""])
+    csvfile.writerow(["The Rasters in " + path + " are listed below"])
+    for ras in raster:
+        
+        try:
+            desc = arcpy.Describe(ras)
+            csvfile.writerow([desc.name,desc.format,arcpy.env.workspace + "\\" + ras,desc.compressionType,desc.spatialreference.name])
+        except:
+            print(ras + " did not seem to be able to be opened")
+            continue
+
+    csvfile.writerow([""])
+    csvfile.writerow(["The tables in " + path + " are listed below"])
+    
+    for table in tables:
+        desc = arcpy.Describe(table)
+        try:
+            csvfile.writerow([desc.name,"Table"])
+        except:
+            print (table + " Did not seem to be able to be opened")
+
+
+    csvfile.writerow([""])
+	csvfile.writerow([""])
+
 
 class Toolbox(object):
     def __init__(self):
@@ -126,49 +171,6 @@ class DescribeGIS(object):
         return
 
 
-    def listgeodatabase(path):
-        arcpy.env.workspace = path
-        csvfile.writerow(["The current file Geodatabase is " + path])
-
-        featureclass = arcpy.ListFeatureClasses()
-        raster = arcpy.ListRasters()
-        tables = arcpy.ListTables()
-
-        csvfile.writerow([""])
-        csvfile.writerow(["The Feature Classes in " + path + " are listed below"])
-        for fc in featureclass:
-            desc = arcpy.Describe(fc)
-            try:
-                csvfile.writerow([desc.name,"Feature Class",arcpy.env.workspace + "\\" + fc,desc.featureType + " " + desc.shapeType,desc.spatialreference.name,arcpy.GetCount_management(fc)])
-            except:
-                print(fc + " did not seem to be able to be opened")
-                continue
-
-        csvfile.writerow([""])
-        csvfile.writerow(["The Rasters in " + path + " are listed below"])
-        for ras in raster:
-
-            try:
-                desc = arcpy.Describe(ras)
-                csvfile.writerow([desc.name,desc.format,arcpy.env.workspace + "\\" + ras,desc.compressionType,desc.spatialreference.name])
-            except:
-                print(ras + " did not seem to be able to be opened")
-                continue
-
-        csvfile.writerow([""])
-        csvfile.writerow(["The tables in " + path + " are listed below"])
-        for table in tables:
-            desc = arcpy.Describe(table)
-            try:
-                csvfile.writerow([desc.name,"Table"])
-            except:
-                print (table + " Did not seem to be able to be opened")
-
-
-        csvfile.writerow([""])
-        csvfile.writerow([""])
-
-
 
 
 
@@ -184,7 +186,7 @@ class DescribeGIS(object):
 
 
         file.flush()
-        listfolder(startpath)
+        listfolder(startpath,csvfile)
         file.close()
 
 

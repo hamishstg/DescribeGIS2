@@ -158,7 +158,6 @@ file = open("C:\\Users\\Hamish St George\\Desktop\\test.csv",'w')
 csvfile = csv.writer(file,delimiter = ',')
 
 startpath = r'C:\Users\Hamish St George\Documents\ArcGIS\Projects\MyProject'
-=======
 file = open("C:\\Users\\hstgeorge\\Desktop\\test1.csv",'w')
 csvfile = csv.writer(file,csv.excel,lineterminator = '\n')
 
