@@ -182,6 +182,21 @@ class main():
         featureclass = arcpy.ListFeatureClasses()
         raster = arcpy.ListRasters()
         tables = arcpy.ListTables()
+        relclass = [c.name for c in arcpy.Describe(path).children if c.datatype == "RelationshipClass"]
+        
+        topologies = []
+        gdb_objects = arcpy.ListDatasets(wild_card=None, feature_type='Feature')
+        print "Feature datasets are: " + str(gdb_objects) #only feature datasets are here
+        for obj in gdb_objects:
+            fd_path = os.path.join(path,obj)
+            arcpy.env.workspace = fd_path #get a new workspace pointed to the fd
+            fd_objects = arcpy.ListDatasets(wild_card=None, feature_type='')
+
+            for dataset in fd_objects: #iterate feature dataset objects
+                desc_dataset = arcpy.Describe(dataset)
+                if desc_dataset.datasetType == 'Topology': #finding out whether is topology
+                    topologies.append(desc_dataset)
+        
 
         self.csvfile.writerow([""])
         self.csvfile.writerow(["The Feature Classes in " + path + " are listed below"])
@@ -208,7 +223,6 @@ class main():
 
         self.csvfile.writerow([""])
         self.csvfile.writerow(["The tables in " + path + " are listed below"])
-    
         for table in tables:
             desc = arcpy.Describe(table)
             try:
@@ -217,6 +231,26 @@ class main():
             except:
                 print (table + " Did not seem to be able to be opened")
 
+        self.csvfile.writerow([""])
+        self.csvfile.writerow(["The relationships in " + path + " are listed below"])
+        for rel in relclass:
+            desc = arcpy.Describe(rel)
+            try:
+                self.csvfile.writerow([desc.name,desc.cardinality,desc.originClassNames,desc.destinationClassKeys,desc.isAttachmentRelationship])
+                self.flatcsv.writerow([desc.name,desc.cardinality,desc.originClassNames,desc.destinationClassKeys,desc.isAttachmentRelationship])
+            except:
+                print(rel + " Looks like it could not be opened")
+                continue
+                
+        self.csvfile.writerow([""])
+        self.csvfile.writerow(["The topologies in " + path + " are listed below"])
+        for top in topologies:
+            desc = arcpy.Describe(top)
+            try:
+                self.csvfile.writerow([desc.name,desc.featureClassNames])
+                self.flatcsv.writerow([desc.name,desc.featureClassNames])
+            except:
+                print(top + " does not seem like it could be opened")
 
         self.csvfile.writerow([""])
         self.csvfile.writerow([""])
