@@ -236,8 +236,8 @@ class main():
         for rel in relclass:
             desc = arcpy.Describe(rel)
             try:
-                self.csvfile.writerow([desc.name,"Relationship",desc.originClassNames,desc.destinationClassKeys,desc.isAttachmentRelationship])
-                self.flatcsv.writerow([desc.name,"Relationship",desc.originClassNames,desc.destinationClassKeys,desc.isAttachmentRelationship])
+                self.csvfile.writerow([desc.name,"Relationship",arcpy.env.workspace + "\\" + rel])
+                self.flatcsv.writerow([desc.name,"Relationship",arcpy.env.workspace + "\\" + rel])
             except:
                 print(rel + " Looks like it could not be opened")
                 continue
