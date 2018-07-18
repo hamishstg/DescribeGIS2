@@ -55,7 +55,7 @@ file = open("C:\\Users\\hstgeorge\\Desktop\\testsde.csv",'w')
 csvfile = csv.writer(file,csv.excel,lineterminator = '\n')
 
 
-startpath = r'C:\Users\hstgeorge\Documents\ArcGIS\Projects\MyProject3\LEA-304752.sde'
+startpath = r'C:\Users\hstgeorge\AppData\Roaming\ESRI\Desktop10.6\ArcCatalog\Connection to LEA-304752 (2).sde'
 arcpy.env.workspace = startpath
 
 

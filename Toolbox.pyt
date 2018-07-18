@@ -126,8 +126,8 @@ class main():
         for cad in cadlist:
             try:
                 desc = arcpy.Describe(cad)
-                self.csvfile.writerow([desc.name,"CAD File",arcpy.env.workspace + "\\" + cad,desc.spatialreference.name])
-                self.flatcsv.writerow([desc.name,"CAD File",arcpy.env.workspace + "\\" + cad,desc.spatialreference.name])
+                self.csvfile.writerow([desc.name,"CAD File",arcpy.env.workspace + "\\" + cad,"".desc.spatialreference.name])
+                self.flatcsv.writerow([desc.name,"CAD File",arcpy.env.workspace + "\\" + cad,"",desc.spatialreference.name])
             except:
                 print("Could not open cad data")
                 continue
@@ -151,8 +151,8 @@ class main():
             mxd = arcpy.mapping.MapDocument(arcpy.env.workspace + "\\" + maps)
             self.csvfile.writerow(["The Projections for " + maps + " dataframes are listed below"])
             for df in arcpy.mapping.ListDataFrames(mxd):
-                self.csvfile.writerow([df.name, df.spatialReference.name])
-                self.flatcsv.writerow([df.name, df.spatialReference.name])
+                self.csvfile.writerow([df.name,"Maps",arcpy.env.workspace + "\\" + maps,"",df.spatialReference.name])
+                self.flatcsv.writerow([df.name,"Maps",arcpy.emv.workspace + "\\" + maps,"",df.spatialReference.name])
 
             self.csvfile.writerow(["A list of the layers in " + maps])
             for lyr in arcpy.mapping.ListLayers(mxd):
@@ -226,8 +226,8 @@ class main():
         for table in tables:
             desc = arcpy.Describe(table)
             try:
-                self.csvfile.writerow([desc.name,"Table"])
-                self.flatcsv.writerow([desc.name,"Table"])
+                self.csvfile.writerow([desc.name,"Table",arcpy.env.workspace + table])
+                self.flatcsv.writerow([desc.name,"Table",arcpy.env.workspace + table])
             except:
                 print (table + " Did not seem to be able to be opened")
 
@@ -236,13 +236,13 @@ class main():
         for rel in relclass:
             desc = arcpy.Describe(rel)
             try:
-                self.csvfile.writerow([desc.name,desc.cardinality,desc.originClassNames,desc.destinationClassKeys,desc.isAttachmentRelationship])
-                self.flatcsv.writerow([desc.name,desc.cardinality,desc.originClassNames,desc.destinationClassKeys,desc.isAttachmentRelationship])
+                self.csvfile.writerow([desc.name,"Relationship",desc.originClassNames,desc.destinationClassKeys,desc.isAttachmentRelationship])
+                self.flatcsv.writerow([desc.name,"Relationship",desc.originClassNames,desc.destinationClassKeys,desc.isAttachmentRelationship])
             except:
                 print(rel + " Looks like it could not be opened")
                 continue
                 
-        self.csvfile.writerow([""])
+        self.csvfile.writerow([""]) 
         self.csvfile.writerow(["The topologies in " + path + " are listed below"])
         for top in topologies:
             desc = arcpy.Describe(top)
