@@ -70,12 +70,11 @@ class DescribeGIS(object):
             splitpath = splitpath + line + "\\"
         splitpath = splitpath[:-1]
         
-        flatfile = open(splitpath,'w')
-        file = open(outfile,'w')
+        flatfile = open(splitpath + ".csv",'w')
+        file = open(outfile + ".md",'w')
         flatcsv = csv.writer(flatfile,csv.excel,lineterminator = '\n')
-        csvfile = csv.writer(file,csv.excel,lineterminator = '\n')
         
-        listing = main(csvfile,startpath,file,flatfile,flatcsv)
+        listing = main(file,startpath,flatfile,flatcsv)
         
         arcpy.env.workspace = startpath
 
@@ -91,17 +90,15 @@ class DescribeGIS(object):
     
     
 class main():
-    def __init__(self,csvfile,path,file,flatfile,flatcsv):
-        self.csvfile = csvfile
-        self.path = path
+    def __init__(self,file,path,flatfile,flatcsv):
         self.file = file
+        self.path = path
         self.flatfile = flatfile
         self.flatcsv = flatcsv
     
     def listfolder(self,path):
         arcpy.env.workspace = path
-        self.csvfile.writerow(["the Current workpath is " + path])
-        self.csvfile.writerow([""])
+        self.file.write("the Current workpath is: " + path + "\n")
 
         featureclass = arcpy.ListFeatureClasses()
         raster = arcpy.ListRasters()
@@ -110,23 +107,23 @@ class main():
         mxd = arcpy.ListFiles("*.mxd")
     
     
-        self.csvfile.writerow(["The shapefiles in this folder are Listed Below:"])
+        self.file.write("The shapefiles in this folder are Listed Below:\n\n")
         for fc in featureclass:
             desc = arcpy.Describe(fc)
             try:
-                self.csvfile.writerow([desc.name,"Shapefile",arcpy.env.workspace + "\\" + fc,desc.featureType + " " + desc.shapeType,desc.spatialreference.name,arcpy.GetCount_management(fc)])
+                self.file.write("| " + desc.name + " | " + "Shapefile" + " | " + arcpy.env.workspace + "\\" + fc,desc.featureType + " " + desc.shapeType + " | " + desc.spatialreference.name + " | " + arcpy.GetCount_management(fc)+ " |  \n")
                 self.flatcsv.writerow([desc.name,"Shapefile",arcpy.env.workspace + "\\" + fc,desc.featureType + " " + desc.shapeType,desc.spatialreference.name,arcpy.GetCount_management(fc)])
                 
             except:
                 print(fc + " Did not seem to be able to be opened")
                 continue
 
-        self.csvfile.writerow([""])
-        self.csvfile.writerow(["The CAD datasets within this folder are listed below:"])
+        self.file.write("")
+        self.file.write("The CAD datasets within this folder are listed below:\n\n")
         for cad in cadlist:
             try:
                 desc = arcpy.Describe(cad)
-                self.csvfile.writerow([desc.name,"CAD File",arcpy.env.workspace + "\\" + cad,"".desc.spatialreference.name])
+                self.file.write("| " + desc.name + " | " + "CAD File" + " | " + arcpy.env.workspace + "\\" + cad + " | " + desc.spatialreference.name + " |  \n")
                 self.flatcsv.writerow([desc.name,"CAD File",arcpy.env.workspace + "\\" + cad,"",desc.spatialreference.name])
             except:
                 print("Could not open cad data")
@@ -134,13 +131,13 @@ class main():
 
 
 
-        self.csvfile.writerow([""])
-        self.csvfile.writerow(["The rasters within this folder are listed below:"])
+        self.file.write("")
+        self.file.write("The rasters within this folder are listed below:\n\n")
     
         for ras in raster:
             try:
                 desc = arcpy.Describe(ras)
-                self.csvfile.writerow([desc.name,desc.format,arcpy.env.workspace + "\\" + ras,desc.compressionType,desc.spatialreference.name])
+                self.file.write(" | " + desc.name + " | " + desc.format,arcpy.env.workspace + "\\" + ras,desc.compressionType + " | " + desc.spatialreference.name + " |  \n")
                 self.flatcsv.writerow([desc.name,desc.format,arcpy.env.workspace + "\\" + ras,desc.compressionType,desc.spatialreference.name])
             except:
                 print (ras + " did not seem to be able to be opened")
@@ -149,19 +146,19 @@ class main():
 
         for maps in mxd:
             mxd = arcpy.mapping.MapDocument(arcpy.env.workspace + "\\" + maps)
-            self.csvfile.writerow(["The Projections for " + maps + " dataframes are listed below"])
+            self.file.write("The Projections for " + maps + " dataframes are listed below\n\n")
             for df in arcpy.mapping.ListDataFrames(mxd):
-                self.csvfile.writerow([df.name,"Maps",arcpy.env.workspace + "\\" + maps,"",df.spatialReference.name])
+                self.file.write(" | " + df.name + " | " + "Maps" + " | " + arcpy.env.workspace + "\\" + maps + " | " + "" + " | " + df.spatialReference.name + " |  \n")
                 self.flatcsv.writerow([df.name,"Maps",arcpy.emv.workspace + "\\" + maps,"",df.spatialReference.name])
 
-            self.csvfile.writerow(["A list of the layers in " + maps])
+            self.file.write("A list of the layers in " + maps + "\n\n")
             for lyr in arcpy.mapping.ListLayers(mxd):
                 if lyr.supports("DATASOURCE"):
-                    self.csvfile.writerow([lyr.datasetName,lyr.dataSource])
+                    self.file.write(" | " + lyr.datasetName + " | " + lyr.dataSource)
                     self.flatcsv.writerow([lyr.datasetName,lyr.dataSource])
 
-        self.csvfile.writerow([""])
-        self.csvfile.writerow([""])
+        self.file.write("")
+        self.file.write("")
         for work in workspace:
             print(work)
             if work.endswith(".gdb"):
@@ -177,7 +174,7 @@ class main():
     
     def listgeodatabase(self,path):
         arcpy.env.workspace = path
-        self.csvfile.writerow(["The current file Geodatabase is " + path])
+        self.file.write("The current file Geodatabase is " + path + "\n")
     
         featureclass = arcpy.ListFeatureClasses()
         raster = arcpy.ListRasters()
@@ -198,62 +195,62 @@ class main():
                     topologies.append(desc_dataset)
         
 
-        self.csvfile.writerow([""])
-        self.csvfile.writerow(["The Feature Classes in " + path + " are listed below"])
+        self.file.write("")
+        self.file.write("The Feature Classes in " + path + " are listed below\n\n")
         for fc in featureclass:
             desc = arcpy.Describe(fc)
             try:
-                self.csvfile.writerow([desc.name,"Feature Class",arcpy.env.workspace + "\\" + fc,desc.featureType + " " + desc.shapeType,desc.spatialreference.name,arcpy.GetCount_management(fc)])
+                self.file.write("| " + desc.name + " | " + "Feature Class" + " | " + arcpy.env.workspace + "\\" + fc,desc.featureType + " " + desc.shapeType + " | " + desc.spatialreference.name + " | " + arcpy.GetCount_management(fc)+ " | \n")
                 self.flatcsv.writerow([desc.name,"Feature Class",arcpy.env.workspace + "\\" + fc,desc.featureType + " " + desc.shapeType,desc.spatialreference.name,arcpy.GetCount_management(fc)])
             except:
                 print(fc + " did not seem to be able to be opened")
                 continue
 
-        self.csvfile.writerow([""])
-        self.csvfile.writerow(["The Rasters in " + path + " are listed below"])
+        self.file.write("")
+        self.file.write("The Rasters in " + path + " are listed below\n\n")
         for ras in raster:
         
             try:
                 desc = arcpy.Describe(ras)
-                self.csvfile.writerow([desc.name,desc.format,arcpy.env.workspace + "\\" + ras,desc.compressionType,desc.spatialreference.name])
+                self.file.write(" | " + desc.name + " | " + desc.format,arcpy.env.workspace + "\\" + ras,desc.compressionType + " | " + desc.spatialreference.name + " | \n")
                 self.flatcsv.writerow([desc.name,desc.format,arcpy.env.workspace + "\\" + ras,desc.compressionType,desc.spatialreference.name])
             except:
                 print(ras + " did not seem to be able to be opened")
                 continue
 
-        self.csvfile.writerow([""])
-        self.csvfile.writerow(["The tables in " + path + " are listed below"])
+        self.file.write("")
+        self.file.write("The tables in " + path + " are listed below\n\n")
         for table in tables:
             desc = arcpy.Describe(table)
             try:
-                self.csvfile.writerow([desc.name,"Table",arcpy.env.workspace + table])
+                self.file.write(" | " + desc.name + " | " + "Table" + " | " + arcpy.env.workspace + table + " | \n")
                 self.flatcsv.writerow([desc.name,"Table",arcpy.env.workspace + table])
             except:
                 print (table + " Did not seem to be able to be opened")
 
-        self.csvfile.writerow([""])
-        self.csvfile.writerow(["The relationships in " + path + " are listed below"])
+        self.file.write("")
+        self.file.write("The relationships in " + path + " are listed below\n\n")
         for rel in relclass:
             desc = arcpy.Describe(rel)
             try:
-                self.csvfile.writerow([desc.name,"Relationship",arcpy.env.workspace + "\\" + rel])
+                self.file.write(" | " + desc.name + " | " + "Relationship" + " | " + arcpy.env.workspace + "\\" + rel + " | \n")
                 self.flatcsv.writerow([desc.name,"Relationship",arcpy.env.workspace + "\\" + rel])
             except:
                 print(rel + " Looks like it could not be opened")
                 continue
                 
-        self.csvfile.writerow([""]) 
-        self.csvfile.writerow(["The topologies in " + path + " are listed below"])
+        self.file.write("") 
+        self.file.write("The topologies in " + path + " are listed below")
         for top in topologies:
             desc = arcpy.Describe(top)
             try:
-                self.csvfile.writerow([desc.name,desc.featureClassNames])
+                self.file.write(" | " + desc.name + " | " + desc.featureClassNames + " | \n")
                 self.flatcsv.writerow([desc.name,desc.featureClassNames])
             except:
                 print(top + " does not seem like it could be opened")
 
-        self.csvfile.writerow([""])
-        self.csvfile.writerow([""])
+        self.file.write("")
+        self.file.write("")
         
         self.file.flush()
         self.flatfile.flush()
