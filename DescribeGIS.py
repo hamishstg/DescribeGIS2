@@ -12,6 +12,8 @@ def listgeodatabase(path):
     raster = arcpy.ListRasters()
     tables = arcpy.ListTables()
 
+
+    print len(featureclass)
     csvfile.writerow([""])
     csvfile.writerow(["The Feature Classes in " + path + " are listed below"])
     for fc in featureclass:
@@ -57,41 +59,13 @@ def listfolder(path):
     workspace = arcpy.ListWorkspaces()
     mxd = arcpy.ListFiles("*.mxd")
 
-    csvfile.writerow(["hello world"])
-
-    for fc in featureclass:
-        desc = arcpy.Describe(fc)
-        print ("there was a feature class")
-        csvfile.writerow(["feature class goes here"])
-
-    for ras in raster:
-        desc = arcpy.Describe(ras)
-        print ("there was a raster")
-        csvfile.writerow(["raster data goes here"])
-
-    for maps in mxd:
-        desc = arcpy.Describe(maps)
-        csvfile.writerow(["maps data will go here"])
-        #need to do some other stuff before printing
-
-    for work in workspace:
-        if work.endswith(".gdb"):
-            print(work + " is a file geodatabase will run function")
-            #call list file geodatabase function
-        elif os.path.isdir(work):
-            print(work + " Is a folder will call again to run recursively")
-            #make recursive call to funtion to start again :)
-
-    csvfile.writerow(["the Current workpath is " + path])
-    csvfile.writerow([""])
-
     featureclass = arcpy.ListFeatureClasses()
     raster = arcpy.ListRasters()
     cadlist = arcpy.ListDatasets("*.dwg")
     workspace = arcpy.ListWorkspaces()
     mxd = arcpy.ListFiles("*.mxd")
 
-
+    print(len(featureclass))
     csvfile.writerow(["The shapefiles in this folder are Listed Below:"])
     for fc in featureclass:
         desc = arcpy.Describe(fc)
@@ -103,6 +77,7 @@ def listfolder(path):
 
     csvfile.writerow([""])
     csvfile.writerow(["The CAD datasets within this folder are listed below:"])
+    print(len(cadlist))
     for cad in cadlist:
         try:
             desc = arcpy.Describe(cad)
@@ -154,15 +129,12 @@ def listfolder(path):
 
 
 
-file = open("C:\\Users\\Hamish St George\\Desktop\\test.csv",'w')
-csvfile = csv.writer(file,delimiter = ',')
 
-startpath = r'C:\Users\Hamish St George\Documents\ArcGIS\Projects\MyProject'
-file = open("C:\\Users\\hstgeorge\\Desktop\\test1.csv",'w')
+file = open("C:\Users\hstgeorge\Desktop\\test.csv",'w')
 csvfile = csv.writer(file,csv.excel,lineterminator = '\n')
 
 
-startpath = r'C:\EsriTraining\EsriTraining\ARC2\Analysis'
+startpath = r'D:\Data for testing'
 arcpy.env.workspace = startpath
 
 
