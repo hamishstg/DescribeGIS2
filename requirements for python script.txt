@@ -43,9 +43,9 @@ My thoughts are that you have a look at this project at the end of your day when
 
 So what do you think?  What do you need?
 
-Mosaic Datasets name and projection of mosaic dataset
-Fix bug in mxd's
-call rasters rasters
-print feature datasets projection of feature datasets
+Mosaic Datasets name and projection of mosaic dataset - done
+Fix bug in mxd's - can't see what bug is
+call rasters rasters - done
+print feature datasets projection of feature datasets - done
 Spatial views and query layers
 

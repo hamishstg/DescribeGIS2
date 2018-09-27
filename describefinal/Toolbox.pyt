@@ -136,29 +136,32 @@ class main():
         for ras in raster:
             try:
                 desc = arcpy.Describe(ras)
-                self.flatcsv.writerow([desc.name,desc.format,arcpy.env.workspace + "\\" + ras,desc.compressionType,desc.spatialreference.name])
+                self.flatcsv.writerow([desc.name,"Raster",arcpy.env.workspace + "\\" + ras,desc.format,desc.spatialreference.name])
             except:
                 arcpy.AddMessage(ras + " did not seem to be able to be opened")
                 continue
 
         #For each mxd within the folder
         for maps in mxd:
-            mxd = arcpy.mapping.MapDocument(arcpy.env.workspace + "\\" + maps)
-            #list all dataframes an write there spatial reference to a csv
-            for df in arcpy.mapping.ListDataFrames(mxd):
-                try:
-                    self.flatcsv.writerow([df.name,"Data frames",arcpy.env.workspace + "\\" + maps,"",df.spatialReference.name])
-                except:
-                    continue
-            
-            #For each layer in the mxd print to a csv file
-            for lyr in arcpy.mapping.ListLayers(mxd):
-                if lyr.supports("DATASOURCE"):
+            try:
+                mxd = arcpy.mapping.MapDocument(arcpy.env.workspace + "\\" + maps)
+                #list all dataframes an write there spatial reference to a csv
+                for df in arcpy.mapping.ListDataFrames(mxd):
                     try:
-                        self.flatcsv.writerow([lyr.datasetName,lyr.dataSource])
+                        self.flatcsv.writerow([df.name,"Data frames",arcpy.env.workspace + "\\" + maps,"",df.spatialReference.name])
                     except:
-                        arcpy.AddMessage('Broken data link in ' + maps)
                         continue
+
+                #For each layer in the mxd print to a csv file
+                for lyr in arcpy.mapping.ListLayers(mxd):
+                    if lyr.supports("DATASOURCE"):
+                        try:
+                            self.flatcsv.writerow([lyr.datasetName,"Layer",lyr.dataSource])
+                        except:
+                            arcpy.AddMessage('Broken data link in ' + maps)
+                            continue
+            except:
+                arcpy.message(maps + "did not seem to be able to be opened")
         
         #Recursively search all of the folders in a depth first search check whether to run listgeodatabase or listfolder
         for work in workspace:
@@ -173,7 +176,8 @@ class main():
         
         
     def listfeaturedataset(self,path):
-        arcpy.env.workspace = path  
+        arcpy.env.workspace = path
+        arcpy.AddMessage(path)
         
         featureclass = arcpy.ListFeatureClasses()
         
@@ -195,6 +199,7 @@ class main():
         raster = arcpy.ListRasters()
         tables = arcpy.ListTables()
         featuredatasets = arcpy.ListDatasets(feature_type = "Feature")
+        mosaics = arcpy.ListDatasets(feature_type="Mosaic")
         
             # can print out topologies and relationshipclasses if needed please uncomment this line to do so and lines 246-262
         #relclass = [c.name for c in arcpy.Describe(path).children if c.datatype == "RelationshipClass"]
@@ -227,7 +232,7 @@ class main():
         for ras in raster:
             try:
                 desc = arcpy.Describe(ras)
-                self.flatcsv.writerow([desc.name,desc.format,arcpy.env.workspace + "\\" + ras,desc.compressionType,desc.spatialreference.name])
+                self.flatcsv.writerow([desc.name,"Raster",arcpy.env.workspace + "\\" + ras,desc.format,desc.spatialreference.name])
             except:
                 arcpy.AddMessage(ras + " did not seem to be able to be opened")
                 continue
@@ -236,12 +241,28 @@ class main():
         for table in tables:
             try:
                 desc = arcpy.Describe(table)
-                self.flatcsv.writerow([desc.name,"Table",arcpy.env.workspace + table])
+                self.flatcsv.writerow([desc.name,"Table",arcpy.env.workspace + "\\" + table])
             except:
                 arcpy.AddMessage(table + " Did not seem to be able to be opened")
+                continue
                 
         for fd in featuredatasets:
-            self.listfeaturedataset(os.path.join(arcpy.env.workspace,fd))
+            temp = arcpy.env.workspace
+            try:
+                desc = arcpy.Describe(fd)
+                self.flatcsv.writerow([desc.name,"Feature Dataset",arcpy.env.workspace + "\\" + fd,"",desc.spatialreference.name])
+                self.listfeaturedataset(os.path.join(arcpy.env.workspace,fd))
+                arcpy.env.workspace = temp
+            except:
+                arcpy.AddMessage(fd + " Did not seem to be able to be opened")
+                continue
+
+        for mos in mosaics:
+            try:
+                desc = arcpy.Describe(mos)
+                self.flatcsv.writerow([desc.name,"Mosaic Dataset",arcpy.env.workspace + "\\" + mos,"",desc.spatialreference.name])
+            except:
+                arcpy.AddMessage(mos + "Did not seem to be able to be opened")
                 
         #for each relationship in the geodatabase print the values to a csv
         #for rel in relclass:
