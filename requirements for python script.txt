@@ -42,3 +42,10 @@ There’s an estimation of 2 days work to produce these scripts. I think it sounds
 My thoughts are that you have a look at this project at the end of your day when support slows down and the phones stop ringing. This week it’s maybe 1hr per day and next week when we’ve got more on 2hrs per day. This gets you up to 13hrs if you were to kick it off today.
 
 So what do you think?  What do you need?
+
+Mosaic Datasets name and projection of mosaic dataset
+Fix bug in mxd's
+call rasters rasters
+print feature datasets projection of feature datasets
+Spatial views and query layers
+
