@@ -37,7 +37,7 @@ class DescribeGIS(object):
             name="output_path",
             datatype="DEFile",
             parameterType="Required",
-            direction="Input")
+            direction="Output")
         
         params = [param0,param1]
         return params
@@ -81,7 +81,7 @@ class DescribeGIS(object):
         
         #check if path is an sde or if it is a csv run script and then close file
         file.flush()
-        if (startpath.endswith(".sde")):
+        if (startpath.endswith(".sde") or startpath.endswith(".gdb")):
             listing.listgeodatabase(startpath)
         else:
             listing.listfolder(startpath)
@@ -107,11 +107,13 @@ class main():
     def listfolder(self,path):
         arcpy.env.workspace = path
 
+
         #list all available data
         featureclass = arcpy.ListFeatureClasses()
         raster = arcpy.ListRasters()
         cadlist = arcpy.ListDatasets("*.dwg")
         workspace = arcpy.ListWorkspaces()
+        arcpy.AddMessage(arcpy.env.workspace)
         mxd = arcpy.ListFiles("*.mxd")
         
         #For each shapefile print the values to the csv
@@ -144,24 +146,30 @@ class main():
         #For each mxd within the folder
         for maps in mxd:
             try:
-                mxd = arcpy.mapping.MapDocument(arcpy.env.workspace + "\\" + maps)
+                documents = arcpy.mapping.MapDocument(arcpy.env.workspace + "\\" + maps)
                 #list all dataframes an write there spatial reference to a csv
-                for df in arcpy.mapping.ListDataFrames(mxd):
+                for df in arcpy.mapping.ListDataFrames(documents):
                     try:
                         self.flatcsv.writerow([df.name,"Data frames",arcpy.env.workspace + "\\" + maps,"",df.spatialReference.name])
                     except:
                         continue
 
                 #For each layer in the mxd print to a csv file
-                for lyr in arcpy.mapping.ListLayers(mxd):
-                    if lyr.supports("DATASOURCE"):
-                        try:
-                            self.flatcsv.writerow([lyr.datasetName,"Layer",lyr.dataSource])
-                        except:
-                            arcpy.AddMessage('Broken data link in ' + maps)
-                            continue
+                for lyr in arcpy.mapping.ListLayers(documents):
+                    try:
+                        if lyr.supports("DATASOURCE"):
+                            try:
+                                if '%' in lyr.datasetName:
+                                    self.flatcsv.writerow([lyr.datasetName, "Layer", lyr.dataSource])
+                                else:
+                                    self.flatcsv.writerow([lyr.datasetName,"Layer",lyr.dataSource])
+                            except:
+                                arcpy.AddMessage('Layer ' + lyr + " in " + maps + " appears to be broken")
+                                continue
+                    except:
+                        arcpy.AddMessage("Something wrong with layer " + lyr + " in " + maps)
             except:
-                arcpy.message(maps + "did not seem to be able to be opened")
+                continue
         
         #Recursively search all of the folders in a depth first search check whether to run listgeodatabase or listfolder
         for work in workspace:
@@ -201,24 +209,29 @@ class main():
         featuredatasets = arcpy.ListDatasets(feature_type = "Feature")
         mosaics = arcpy.ListDatasets(feature_type="Mosaic")
         
-            # can print out topologies and relationshipclasses if needed please uncomment this line to do so and lines 246-262
-        #relclass = [c.name for c in arcpy.Describe(path).children if c.datatype == "RelationshipClass"]
+        # can print out topologies and relationshipclasses if needed please uncomment this line to do so and lines 246-262
+        relclass = [c.name for c in arcpy.Describe(path).children if c.datatype == "RelationshipClass"]
         #list topoligies will likely be commented out
-        #topologies = []
-        #gdb_objects = arcpy.ListDatasets(wild_card=None, feature_type='Feature')
-        #print "Feature datasets are: " + str(gdb_objects) #only feature datasets are here
-        #for obj in gdb_objects:
-        #    fd_path = os.path.join(path,obj)
-        #    arcpy.env.workspace = fd_path #get a new workspace pointed to the fd
-        #    fd_objects = arcpy.ListDatasets(wild_card=None, feature_type='')
+        topologies = []
+        gdb_objects = arcpy.ListDatasets(wild_card=None, feature_type='Feature')
+        fd_objects = []
+        tempworkspace = arcpy.env.workspace
+        for obj in gdb_objects:
+            fd_path = os.path.join(path,obj)
+            arcpy.env.workspace = fd_path #get a new workspace pointed to the fd
+            fd_objects = arcpy.ListDatasets(wild_card=None, feature_type='')
 
-        #for dataset in fd_objects: #iterate feature dataset objects
-        #        desc_dataset = arcpy.Describe(dataset)
-        #        if desc_dataset.datasetType == 'Topology': #finding out whether is topology
-        #            topologies.append(desc_dataset)
-                    
-        
-        
+        for dataset in fd_objects: #iterate feature dataset objects
+                desc_dataset = arcpy.Describe(dataset)
+                if desc_dataset.datasetType == 'Topology': #finding out whether is topology
+                    try:
+                        self.flatcsv.writerow([desc_dataset.name, "Topology", arcpy.env.workspace + "\\" + dataset])
+                    except:
+                        arcpy.AddMessage(dataset + " does not seem like it could be opened")
+
+
+        arcpy.env.workspace = tempworkspace
+
         #For each feature class in the geodatabase print the values to a csv
         for fc in featureclass:
             try:
@@ -245,17 +258,6 @@ class main():
             except:
                 arcpy.AddMessage(table + " Did not seem to be able to be opened")
                 continue
-                
-        for fd in featuredatasets:
-            temp = arcpy.env.workspace
-            try:
-                desc = arcpy.Describe(fd)
-                self.flatcsv.writerow([desc.name,"Feature Dataset",arcpy.env.workspace + "\\" + fd,"",desc.spatialreference.name])
-                self.listfeaturedataset(os.path.join(arcpy.env.workspace,fd))
-                arcpy.env.workspace = temp
-            except:
-                arcpy.AddMessage(fd + " Did not seem to be able to be opened")
-                continue
 
         for mos in mosaics:
             try:
@@ -265,20 +267,27 @@ class main():
                 arcpy.AddMessage(mos + "Did not seem to be able to be opened")
                 
         #for each relationship in the geodatabase print the values to a csv
-        #for rel in relclass:
-        #    try:
-        #        desc = arcpy.Describe(rel)
-        #        self.flatcsv.writerow([desc.name,"Relationship",arcpy.env.workspace + "\\" + rel])
-        #    except:
-        #       arcpy.AddMessage(rel + " Looks like it could not be opened")
-        #        continue
+        for rel in relclass:
+            try:
+                desc = arcpy.Describe(rel)
+                self.flatcsv.writerow([desc.name,"Relationship",arcpy.env.workspace + "\\" + rel])
+            except:
+                arcpy.AddMessage(rel + " Looks like it could not be opened")
+                continue
                 
-        #For each topolgy in the geodabase print the values to a csv        
-        #for top in topologies:
-        #    desc = arcpy.Describe(top)
-        #    try:
-        #        self.flatcsv.writerow([desc.name,desc.featureClassNames])
-        #    except:
-        #        arcpy.AddMessage(top + " does not seem like it could be opened")
+        #For each topolgy in the geodabase print the values to a csv
+
+
+        for fd in featuredatasets:
+            arcpy.AddMessage(arcpy.env.workspace)
+            try:
+                desc = arcpy.Describe(arcpy.env.workspace + "\\" + fd)
+                self.flatcsv.writerow([desc.name,"Feature Dataset",arcpy.env.workspace + "\\" + fd,"",desc.spatialreference.name])
+                self.listfeaturedataset(os.path.join(arcpy.env.workspace,fd))
+
+            except:
+                arcpy.AddMessage(fd + " Did not seem to be able to be opened")
+                continue
+            arcpy.env.workspace = temp
                 
         self.file.flush()
